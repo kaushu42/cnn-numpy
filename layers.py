@@ -53,16 +53,16 @@ def convolve(source, filter, stride = 1, mode = 'normal'):
         for j in range(0, width, stride):
                 current_region = source[:, i:i + filter_size, j:j + filter_size, :]
                 temp = current_region * filter
-                x = temp.sum(axis = (1, 2, 3))
-                result[:, i, j] += x
+                result[:, i, j] += temp.sum(axis = (1, 2, 3))
     return result
 
-def max_pool(source, pool_size, stride = 'auto'):
+def max_pool_single(source, pool_size, stride = 'auto'):
     '''
-        max_pool: used to perform max pooling of an image.
+        max_pool_single: used to perform max pooling a single image.
 
         Returns:
             result: The result of max pooling
+
         Args:
             source: The source matrix to max pool
             pool_size : The size of the pooling matrix
@@ -82,6 +82,33 @@ def max_pool(source, pool_size, stride = 'auto'):
                 result[i, j] = current_region.max()
     return result
 
+def max_pool(source, pool_size, stride = 'auto'):
+    '''
+        max_pool: used to perform max pooling on an image array.
+
+        Returns:
+            result: The result of max pooling
+
+        Args:
+            source: The source matrix to max pool
+            pool_size : The size of the pooling matrix
+            stride: Used to set the pool distance
+    '''
+    samples, image_height, image_width = source.shape
+    if stride == 'auto':
+        stride = pool_size
+
+    height = (image_height - pool_size)//stride + 1
+    width = (image_width - pool_size)//stride + 1
+    result = np.zeros((samples, height, width))
+
+    for i in range(0, height, stride):
+        for j in range(0, width, stride):
+                current_region = source[:, i:i + pool_size, j:j + pool_size]
+                result[:, i, j] = current_region.max(axis = (1, 2))
+    return result
+
+
 def visualize(input, n):
     x = 0
     for i in input:
@@ -92,42 +119,37 @@ def visualize(input, n):
             break
 
 def main():
-    src1, src2, src3, src4 = mpimg.imread('pic.jpg'),mpimg.imread('pic2.jpg'), mpimg.imread('pic.jpg'),mpimg.imread('pic2.jpg')
-    src = np.array([src1, src2, src3, src4])
-    # del src1, src2
+    src1, src2 = mpimg.imread('pic.jpg'), mpimg.imread('pic2.jpg')
+    src = np.array([src1, src2])
+    del src1, src2
     print(src.shape)
     # visualize(src, 3)
 
     filter = np.array((([-1, 0, 1], [-2, 0, 2], [-1, 0, 1]),
                         ([-1, 0, 1], [-2, 0, 2], [-1, 0, 1]),
                         ([-1, 0, 1], [-2, 0, 2], [-1, 0, 1]),))
-                        # result = convolve(src1, filter)
 
     start = time.time()
     result = convolve(src, filter)
-    # result = relu(result)
     end = time.time()
     print('Time taken for vectorized: ', end - start)
 
-    start = time.time()
-    result = np.array([convolve_single(src1, filter), convolve_single(src2, filter), convolve_single(src3, filter), convolve_single(src4, filter)])
-    print(result.shape)
-    end = time.time()
-    print('Time taken for non vectorized: ', end - start)
-    exit()
-    plt.imshow(result[0, :, :, 0], cmap = 'gray')
+    result = relu(result)
+    plt.imshow(result[0, :, :], cmap = 'gray')
     plt.show()
-    plt.imshow(result[1, :, :, 0], cmap = 'gray')
+    plt.imshow(result[1, :, :], cmap = 'gray')
     plt.show()
-    exit()
-    print(result.shape)
+    np.save('result', result)
+    result = np.load('result.npy')
 
+    print(result.shape)
     start = time.time()
     result = max_pool(result, pool_size = 2)
     end = time.time()
-    print('Time taken: ', end - start)
-
-    plt.imshow(result, cmap = 'gray')
+    print('Time taken Vectorized Max Pool: ', end - start)
+    plt.imshow(result[0], cmap = 'gray')
+    plt.show()
+    plt.imshow(result[1], cmap = 'gray')
     plt.show()
     print(result.shape)
 if __name__ == '__main__':
