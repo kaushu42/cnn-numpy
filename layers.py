@@ -118,6 +118,11 @@ def visualize(input, n):
         if x == n:
             break
 
+def flatten(input):
+    x_size = 512 # ??
+    y_size = 512 # ??
+    return input.reshape(input.shape[0], x_size * y_size)
+
 def main():
     src1, src2 = mpimg.imread('pic.jpg'), mpimg.imread('pic2.jpg')
     src = np.array([src1, src2])
@@ -139,18 +144,16 @@ def main():
     plt.show()
     plt.imshow(result[1, :, :], cmap = 'gray')
     plt.show()
-    np.save('result', result)
-    result = np.load('result.npy')
 
     print(result.shape)
     start = time.time()
     result = max_pool(result, pool_size = 2)
     end = time.time()
     print('Time taken Vectorized Max Pool: ', end - start)
-    plt.imshow(result[0], cmap = 'gray')
-    plt.show()
-    plt.imshow(result[1], cmap = 'gray')
-    plt.show()
+    # plt.imshow(result[0], cmap = 'gray')
+    # plt.show()
+    # plt.imshow(result[1], cmap = 'gray')
+    # plt.show()
     print(result.shape)
 if __name__ == '__main__':
     main()
