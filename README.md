@@ -1,12 +1,6 @@
 # cnn-numpy
 ## CNN written from scratch (using only numpy)
+Created Forward pass for Convolutional and Pooling layers
 
-Work in Progress
+Also includes a dense layer
 
-# TO DO:
-
-> Implement different layers
-
-> Implement forward prop
-
-> Implement backprop
